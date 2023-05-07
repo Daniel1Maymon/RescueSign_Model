@@ -9,6 +9,7 @@ import os
 BUFF_SIZE = 65536
 HEADERSIZE = 10
 
+#  creating a UDP socket using the socket library and sets the buffer size for receiving data to BUFF_SIZE
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, BUFF_SIZE)
 
@@ -45,7 +46,11 @@ while True:
     
     decoded_frame = cv2.imdecode(encoded_frame, cv2.IMREAD_COLOR)
     frame = cv2.putText(decoded_frame, 'FPS:' + str(fps),
-                        (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                        (10, 40), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        0.7, 
+                        (0, 0, 255),
+                        2)
     cv2.imshow('RECEIVING VIDEO', frame)
 
     full_path = os.path.join(path_out, id)
