@@ -21,7 +21,15 @@ message = b'Hello from client'
 
 client_socket.sendto(message, socket_address)
 fps, st, frames_to_count, cnt = (0, 0, 20, 0)
-path_out = '/root/Environments/python-send-video-with-socket/client-frames/'
+
+# Get the full path of the current file
+file_path = os.path.abspath(__file__)
+
+# Get the directory name of the current file
+dir_name = os.path.dirname(file_path)
+
+path_out = f'{dir_name}/client-frames'
+
 count = 0
 
 while True:

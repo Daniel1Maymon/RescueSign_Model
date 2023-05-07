@@ -23,8 +23,15 @@ server_socket.bind(socket_address)
 print(f"Listening at: {socket_address}")
 
 count = 0
-path_out = '/root/Environments/python-send-video-with-socket/server-frames/'
-video_src = '/root/Environments/python-send-video-with-socket/kitty.mp4'
+
+# Get the full path of the current file
+file_path = os.path.abspath(__file__)
+
+# Get the directory name of the current file
+dir_name = os.path.dirname(file_path)
+
+path_out = f'{dir_name}/server-frames'
+video_src = f'{dir_name}/kitty.mp4'
 
 vid = cv2.VideoCapture(video_src)
 fps, st, frames_to_count, cnt = (0,0,20,0)
