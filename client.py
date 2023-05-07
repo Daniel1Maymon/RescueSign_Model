@@ -37,18 +37,10 @@ while True:
     # npdata = pickle.loads(packet[HEADERSIZE:])
     
     id, encoded_frame = pickle.loads(packet[HEADERSIZE:])
-    # decoded_frame = cv2.imdecode(encoded_frame, 1)
-    # decoded_frame = cv2.imdecode(encoded_frame, cv2.IMREAD_COLOR)
-
-    # buffer_id = id_and_buffer[0]
-    # response = (buffer_id, random.choice(["YES", "NO"]))
     model_answer = random.choice(["YES", "NO"])
     response = (encoded_frame, id, model_answer)
     encoded_response = pickle.dumps(response)
 
-    print(f"id = {id}")
-
-    # client_socket.sendto(pickle.dumps(response), socket_address)
     client_socket.sendto(encoded_response, socket_address)
     
     decoded_frame = cv2.imdecode(encoded_frame, cv2.IMREAD_COLOR)
@@ -58,7 +50,6 @@ while True:
 
     full_path = os.path.join(path_out, id)
     cv2.imwrite(full_path + ".jpg", frame)
-    # cv2.imwrite(path_out + "frame%d.jpg" % count, encoded_frame)
     count +=1
 
     key = cv2.waitKey(1) & 0xFF
