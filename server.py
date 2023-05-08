@@ -41,7 +41,7 @@ try:
     while True:
         msg, client_addr = server_socket.recvfrom(BUFF_SIZE)
         print('GOT connection from ', client_addr)
-        # print(f"msg = {msg.decode('utf-8')}")
+        print(f"msg = {msg.decode('utf-8')}")
 
         WIDTH = 600
 

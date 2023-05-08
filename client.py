@@ -18,7 +18,7 @@ host_ip = '0.0.0.0'
 port = 9999
 socket_address = (host_ip, port)
 
-message = b'Hello from client'
+message = b'client'
 
 client_socket.sendto(message, socket_address)
 fps, st, frames_to_count, cnt = (0, 0, 20, 0)
