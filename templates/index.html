@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operator Interface</title>
+</head>
+<body>
+    <h1>Operator Interface</h1>
+    <!-- Operator input elements -->
+    <!-- Example: Button to activate emergency signal -->
+    <button onclick="activateEmergencySignal()">Activate Emergency Signal</button>
+
+    <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script>
+        // Connect to the websocket server
+        const socket = io.connect();
+
+        // Function to handle emergency signal button click
+        function activateEmergencySignal() {
+            // Send operator input to the server
+            socket.emit('operator_input', { action: 'emergency_signal' });
+        }
+    </script>
+</body>
+</html>
