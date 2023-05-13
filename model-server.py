@@ -53,6 +53,9 @@ def send_video_frames(sock, client_addr):
             message = pickle.dumps(id_and_frame)
             message = bytes(f'{len(message): < {HEADERSIZE}}', "utf-8") + message
             sock.sendto(message, client_addr)
+
+            print("Close the socket connection")
+            model_server_socket.close()
             break
 
         WIDTH = 600
@@ -87,7 +90,10 @@ def send_video_frames(sock, client_addr):
 # Start sending video frames
 # send_video_frames()
 
-def create_socket_and_bind_it() -> socket.socket:
+def create_socket_and_bind_it():
+        HOST = '127.0.0.1'  # the IP address of the operator server
+        PORT = 5001  # the port number used by the operator server
+
         model_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         model_server_socket.setsockopt(
         socket.SOL_SOCKET, socket.SO_RCVBUF, BUFF_SIZE)
@@ -98,29 +104,21 @@ def create_socket_and_bind_it() -> socket.socket:
 
         print(f"Listening at: {socket_address}")
         print('Waiting for operator server connection...')
-        return model_server_socket
+
+        msg, client_addr = model_server_socket.recvfrom(BUFF_SIZE)
+
+        # Receive data from the operator server
+        print('Data received from Operator server: ', msg.decode())
+
+        return model_server_socket, client_addr
 
 if __name__ == '__main__':
-    HOST = '127.0.0.1'  # the IP address of the operator server
-    PORT = 5001  # the port number used by the operator server
-
-    # Create a socket object and bind it
-    model_server_socket = create_socket_and_bind_it()
-
-    # # Accept a connection from the operator server
-    # conn, addr = sock.accept()
-
-    msg, client_addr = model_server_socket.recvfrom(BUFF_SIZE)
-
-    # Receive data from the operator server
-    print('Data received from Operator server: ', msg.decode())
+    # Create a socket object for connection with the operator server and bind it 
+    model_server_socket, client_addr = create_socket_and_bind_it()
 
     send_video_frames(model_server_socket, client_addr)
-    # Process the data and prepare a response
-    response = b'Response from model server'
 
     # # Send the response back to the operator server
     # conn.sendall(response)
 
-    # Close the connection
-    model_server_socket.close()
+
