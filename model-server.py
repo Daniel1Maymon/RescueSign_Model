@@ -49,8 +49,8 @@ def send_video_frames(sock, client_addr):
     while vid.isOpened():
         return_val, frame = vid.read()
         if not return_val:
-            message = 'FINISH'
-            message = pickle.dumps(message)
+            id_and_frame = ('FINISH', None)
+            message = pickle.dumps(id_and_frame)
             message = bytes(f'{len(message): < {HEADERSIZE}}', "utf-8") + message
             sock.sendto(message, client_addr)
             break
@@ -87,21 +87,25 @@ def send_video_frames(sock, client_addr):
 # Start sending video frames
 # send_video_frames()
 
+def create_socket_and_bind_it() -> socket.socket:
+        model_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        model_server_socket.setsockopt(
+        socket.SOL_SOCKET, socket.SO_RCVBUF, BUFF_SIZE)
+
+        # Bind the socket to a specific address and port
+        socket_address = (HOST, PORT)
+        model_server_socket.bind(socket_address)
+
+        print(f"Listening at: {socket_address}")
+        print('Waiting for operator server connection...')
+        return model_server_socket
+
 if __name__ == '__main__':
     HOST = '127.0.0.1'  # the IP address of the operator server
     PORT = 5001  # the port number used by the operator server
 
-    # Create a socket object
-    model_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    model_server_socket.setsockopt(
-        socket.SOL_SOCKET, socket.SO_RCVBUF, BUFF_SIZE)
-
-    # Bind the socket to a specific address and port
-    socket_address = (HOST, PORT)
-    model_server_socket.bind(socket_address)
-
-    print(f"Listening at: {socket_address}")
-    print('Waiting for operator server connection...')
+    # Create a socket object and bind it
+    model_server_socket = create_socket_and_bind_it()
 
     # # Accept a connection from the operator server
     # conn, addr = sock.accept()

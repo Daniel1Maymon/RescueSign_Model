@@ -53,7 +53,7 @@ while True:
                         2)
     cv2.imshow('RECEIVING VIDEO', frame)
 
-    full_path = os.path.join(path_out, id)
+    full_path = os.path.join(path_out, id) # path_out/id
     cv2.imwrite(full_path + ".jpg", frame)
     count +=1
 

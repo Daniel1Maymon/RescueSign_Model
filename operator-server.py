@@ -65,10 +65,13 @@ if __name__ == '__main__':
     while True:
         # Receive response from the model server
         packet, _ = sock.recvfrom(BUFF_SIZE)
-        id, encoded_frame = pickle.loads(packet[HEADERSIZE:])
+        frame_id, encoded_frame = pickle.loads(packet[HEADERSIZE:])
 
-        if 'FINISH' in id:
+        if 'FINISH' in frame_id:
             # display_frames()
+            # Close the socket connection
+            sock.close()
+            print(f"len(frames = {len(frames)})")
             break
 
         decoded_frame = cv2.imdecode(encoded_frame, cv2.IMREAD_COLOR)
@@ -78,13 +81,8 @@ if __name__ == '__main__':
                             0.7,
                             (0, 0, 255),
                             2)
-        full_path = path_out
+        full_path = os.path.join(path_out, frame_id)
         cv2.imwrite(full_path + ".jpg", frame)
 
         frames.append(frame)
         
-        # print('Response from model server:', response.decode())
-
-        # Close the socket connection
-        sock.close()
-        # print(f"Operator server is listening on {PORT}")
