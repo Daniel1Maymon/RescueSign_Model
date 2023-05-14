@@ -1,15 +1,83 @@
-<!-- display.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Display Video</title>
+    <title>Display Images</title>
+
+    <style>
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+
 </head>
 <body>
-<video width="320" height="240" controls>
-  <source src="static/outputt.mp4" type="video/mp4">
-  <source src="static/outputt.mp4" type="video/ogg">
-Your browser does not support the video tag.
-</video>
+    <div id="image-container">
+        <img id="current-image" src="" alt="Image">
+        <div id="nav-buttons">
+            <button id="prev-button">Previous</button>
+            <button id="next-button">Next</button>
+        </div>
+    </div>
 
+      <h2>Options for Operator Response</h2>
+      <button onclick="operatorResponse('Response 1')">Turn on siren </button>
+      <button onclick="operatorResponse('Response 2')">Keep moving</button>
+      <button onclick="operatorResponse('Response 3')">Response 3</button>
+
+    <script>
+        // JavaScript code to display one image at a time and provide navigation
+
+
+        var imageUrls = {{ imageUrls|tojson }}
+        // Get the image container element by its ID
+        var imageContainer = document.getElementById('image-container');
+        // Get the current image element by its ID
+        var currentImage = document.getElementById('current-image');
+        // Get the previous button element by its ID
+        var prevButton = document.getElementById('prev-button');
+        // Get the next button element by its ID
+        var nextButton = document.getElementById('next-button');
+
+        var currentIndex = 0; // Index of the currently displayed image
+
+        // Function to update the displayed image
+        function updateImage() {
+            currentImage.src = imageUrls[currentIndex];
+        }
+
+        // Function to handle the previous button click
+        function handlePrevButtonClick() {
+            if (currentIndex > 0) {
+                currentIndex--;
+            } else {
+                currentIndex = imageUrls.length - 1;
+            }
+            updateImage();
+        }
+
+        // Function to handle the next button click
+        function handleNextButtonClick() {
+            if (currentIndex < imageUrls.length - 1) {
+                currentIndex++;
+            } else {
+                currentIndex = 0;
+            }
+            updateImage();
+        }
+
+        function operatorResponse(response) {
+            // Handle operator responses here
+            console.log("Operator response: " + response);
+            // Add your logic for operator responses
+        }
+
+        // Add event listeners to the previous and next buttons
+        prevButton.addEventListener('click', handlePrevButtonClick);
+        nextButton.addEventListener('click', handleNextButtonClick);
+
+        // Display the initial image
+        updateImage();
+    </script>
 </body>
 </html>

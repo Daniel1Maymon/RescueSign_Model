@@ -10,23 +10,35 @@ HOST = '127.0.0.1'  # the IP address of the model server
 PORT = 5001  # the port number used by the model server
 fps, st, frames_to_count, cnt = (0, 0, 20, 0)
 
-app = Flask(__name__)
-# socketio = SocketIO(app)
+# app = Flask(__name__)
+# # socketio = SocketIO(app)
 
-#  Set up the routes for the operator server endpoints
-@app.route('/')
-def index():
-    return render_template('index.html')
+# #  Set up the routes for the operator server endpoints
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
+
+
+# def trigger_the_disaply_page(frames):
+#     # Trigger the redirect to the '/display' route
+#     return redirect(url_for('display'))
+
+# @app.route('/display')
+# def display_frames(frames):
+#     return render_template('display.html', frames=frames)
 
 
 
-# Get the full path of the current file
-file_path = os.path.abspath(__file__)
+def get_dir_path():
+    # Get the full path of the current file
+    file_path = os.path.abspath(__file__)
 
-# Get the directory name of the current file
-dir_name = os.path.dirname(file_path)
-path_out = f'{dir_name}/operator-server-frames/'
+    # Get the directory name of the current file
+    dir_name = os.path.dirname(file_path)
+    # path_out = f'{dir_name}/operator-server-frames/'
+    path_out = f'static/operator-server-frames/'
 
+    return path_out
 
 def create_socket_and_bind_it() -> socket.socket:
     print("Operator server create a socket object for connection with the model server")
@@ -44,11 +56,6 @@ def create_socket_and_bind_it() -> socket.socket:
     sock.sendto(data, socket_address)
     return sock
 
-
-@app.route('/display')
-def display_frames(frames):
-    return render_template('display.html', frames=frames)
-
 def get_frames_from_model_server(sock: socket.socket) -> list:
     while True:
         # Receive response from the model server
@@ -62,35 +69,30 @@ def get_frames_from_model_server(sock: socket.socket) -> list:
             return frames
 
         decoded_frame = cv2.imdecode(encoded_frame, cv2.IMREAD_COLOR)
-        frame = cv2.putText(decoded_frame, 'FPS:' + str(fps),
+        frame = cv2.putText(decoded_frame, ":".join(frame_id.split("-")[3:]),
                             (10, 40),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             0.7,
                             (0, 0, 255),
                             2)
+        path_out = get_dir_path()
         full_path = os.path.join(path_out, frame_id)
         cv2.imwrite(full_path + ".jpg", frame)
 
         frames.append(frame)
 
 
-def trigger_the_disaply_page(frames):
-    # Trigger the redirect to the '/display' route
-    return redirect(url_for('display'))
-
 if __name__ == '__main__':
 
     # Create a socket object for connection with the operator server and bind it
     sock = create_socket_and_bind_it()
 
-
-    
     frames = []  # List to store received frames
     frames = get_frames_from_model_server(sock)
 
     # After all frames have been received
-    app.run(host=HOST, port=PORT)
-    trigger_the_disaply_page(frames)
+    # app.run(host=HOST, port=PORT)
+    # trigger_the_disaply_page(frames)
 
 
         
