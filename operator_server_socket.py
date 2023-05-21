@@ -40,7 +40,7 @@ def get_dir_path():
 
     return path_out
 
-def create_socket_and_bind_it() -> socket.socket:
+def create_socket_and_bind_it_to_model() -> socket.socket:
     print("Operator server create a socket object for connection with the model server")
     socket_address = (HOST, PORT)
 
@@ -85,7 +85,7 @@ def get_frames_from_model_server(sock: socket.socket) -> list:
 if __name__ == '__main__':
 
     # Create a socket object for connection with the operator server and bind it
-    sock = create_socket_and_bind_it()
+    sock = create_socket_and_bind_it_to_model()
 
     frames = []  # List to store received frames
     frames = get_frames_from_model_server(sock)

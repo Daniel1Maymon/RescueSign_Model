@@ -112,6 +112,7 @@ def create_socket_and_bind_it():
 
         return model_server_socket, client_addr
 
+
 if __name__ == '__main__':
     # Create a socket object for connection with the operator server and bind it 
     model_server_socket, client_addr = create_socket_and_bind_it()

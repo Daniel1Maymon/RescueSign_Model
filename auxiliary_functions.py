@@ -1,7 +1,6 @@
-import subprocess
-import glob
 import os
-import cv2
+from model_server_socket import create_socket_and_bind_it, send_video_frames
+from operator_server_socket import create_socket_and_bind_it_to_model
 
 def read_all_frames():
     frames = []
@@ -29,6 +28,14 @@ def read_all_frames():
         # frames.append(frame)
     
     return jpeg_files
+
+
+async def send_video_from_model_to_operator():
+    model_server_socket, client_addr = create_socket_and_bind_it()
+    send_video_frames(model_server_socket, client_addr)
+
+async def open_socket_in_model_side():
+    sock = create_socket_and_bind_it_to_model()
 
 
     

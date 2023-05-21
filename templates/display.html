@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Display Images</title>
+  <head>
+    <title>Operator Interface</title>
 
     <style>
-        .options {
-            display: flex;
-            flex-direction: column;
-        }
+      .options {
+        display: flex;
+        flex-direction: column;
+      }
     </style>
+  </head>
+  <body>
+    <h1>Operator Interface</h1>
 
-</head>
-<body>
     <div id="image-container">
-        <img id="current-image" src="" alt="Image">
-        <div id="nav-buttons">
-            <button id="prev-button">Previous</button>
-            <button id="next-button">Next</button>
-        </div>
+      <img id="current-image" src="" alt="Image" />
+      <div id="nav-buttons">
+        <button id="prev-button">Previous</button>
+        <button id="next-button">Next</button>
+      </div>
     </div>
 
-      <h2>Options for Operator Response</h2>
-      <button onclick="operatorResponse('Response 1')">Turn on siren </button>
-      <button onclick="operatorResponse('Response 2')">Keep moving</button>
-      <button onclick="operatorResponse('Response 3')">Response 3</button>
+    <h2>Options for Operator Response</h2>
+    <div id="options-container">
+      <button onclick="operatorResponse('Turn on siren')">Turn on siren</button>
+      <button onclick="operatorResponse('Keep moving')">Keep moving</button>
+    </div>
 
     <script>
         // JavaScript code to display one image at a time and provide navigation
 
 
         var imageUrls = {{ imageUrls|tojson }}
+        
         // Get the image container element by its ID
         var imageContainer = document.getElementById('image-container');
         // Get the current image element by its ID
@@ -69,8 +72,25 @@
         function operatorResponse(response) {
             // Handle operator responses here
             console.log("Operator response: " + response);
-            // Add your logic for operator responses
+            
+            // Make an HTTP POST request to send the response to the server
+            fetch('http://127.0.0.1:4002/response_from_operator', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answer: response })
+            })
+            .then(response => {
+                // Handle the server response here if needed 
+                console.log('Server response:', response);
+            })
+            .catch(error => {
+                // Handle any error that occurs during the request
+                console.error('Error:', error);
+            });
         }
+
 
         // Add event listeners to the previous and next buttons
         prevButton.addEventListener('click', handlePrevButtonClick);
@@ -79,5 +99,5 @@
         // Display the initial image
         updateImage();
     </script>
-</body>
+  </body>
 </html>
