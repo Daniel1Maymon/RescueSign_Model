@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
 import os
+from model_socket_class import ModelSocket
 
 
 app = Flask(__name__)
@@ -25,16 +26,19 @@ def get_file_names():
     # Get the directory name of the current file
     dir_path = os.path.dirname(file_path) + '/static'
 
-    file_names = [file for file in os.listdir(dir_path) if '.mp4' in file]
+    file_names = [file for file in os.listdir(dir_path) if file.endswith('.mp4')]
 
     return jsonify(file_names)
 
 @app.route('/process_file', methods=['POST'])
 def process_file():
     data = request.get_json()
-    selected_option = data['option']
+    video_name = data['option']
 
-
+    # Sends the video to the model 
+    model_socket = ModelSocket(video_name)
+    model_socket.create_socket_and_bind_it()
+    model_socket.send_video_frames()
 
     return 'Option received'
 

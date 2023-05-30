@@ -37,6 +37,11 @@ def get_src_vid_path():
     return path_out, dir_name
 
 
+def get_video_name() -> str:
+    
+    
+    return ""
+
 def send_video_frames(sock, client_addr):
 
     # Get the full path of the current file
@@ -63,6 +68,8 @@ def send_video_frames(sock, client_addr):
 
         buffer_id = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
         full_path = os.path.join(path_out, buffer_id)
+
+        print(f"buffer_id ={buffer_id}")
 
         # Save the frame as image:
         cv2.imwrite(path_out + ".jpg", frame)

@@ -8,11 +8,21 @@
         display: flex;
         flex-direction: column;
       }
+      .selected {
+          color: red;
+      }     
     </style>
+
+
+
   </head>
   <body>
     <h1>Operator Interface</h1>
+    <button onclick="openSocket()">Open Socket With The Model</button>
 
+    <div id="waiting-msg">
+      <h3> Waiting for video to be received... </h3>
+    </div>
     <div id="image-container">
       <img id="current-image" src="" alt="Image" />
       <div id="nav-buttons">
@@ -21,83 +31,17 @@
       </div>
     </div>
 
-    <h2>Options for Operator Response</h2>
-    <div id="options-container">
+    
+    <div id="options-container" >
+      <h2>Options for Operator Response</h2>
       <button onclick="operatorResponse('Turn on siren')">Turn on siren</button>
       <button onclick="operatorResponse('Keep moving')">Keep moving</button>
     </div>
 
-    <script>
-        // JavaScript code to display one image at a time and provide navigation
 
 
-        var imageUrls = {{ imageUrls|tojson }}
-        
-        // Get the image container element by its ID
-        var imageContainer = document.getElementById('image-container');
-        // Get the current image element by its ID
-        var currentImage = document.getElementById('current-image');
-        // Get the previous button element by its ID
-        var prevButton = document.getElementById('prev-button');
-        // Get the next button element by its ID
-        var nextButton = document.getElementById('next-button');
 
-        var currentIndex = 0; // Index of the currently displayed image
+    <script src="{{ url_for('static', filename='operator_script.js')}}"></script>
 
-        // Function to update the displayed image
-        function updateImage() {
-            currentImage.src = imageUrls[currentIndex];
-        }
-
-        // Function to handle the previous button click
-        function handlePrevButtonClick() {
-            if (currentIndex > 0) {
-                currentIndex--;
-            } else {
-                currentIndex = imageUrls.length - 1;
-            }
-            updateImage();
-        }
-
-        // Function to handle the next button click
-        function handleNextButtonClick() {
-            if (currentIndex < imageUrls.length - 1) {
-                currentIndex++;
-            } else {
-                currentIndex = 0;
-            }
-            updateImage();
-        }
-
-        function operatorResponse(response) {
-            // Handle operator responses here
-            console.log("Operator response: " + response);
-            
-            // Make an HTTP POST request to send the response to the server
-            fetch('http://127.0.0.1:4002/response_from_operator', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ answer: response })
-            })
-            .then(response => {
-                // Handle the server response here if needed 
-                console.log('Server response:', response);
-            })
-            .catch(error => {
-                // Handle any error that occurs during the request
-                console.error('Error:', error);
-            });
-        }
-
-
-        // Add event listeners to the previous and next buttons
-        prevButton.addEventListener('click', handlePrevButtonClick);
-        nextButton.addEventListener('click', handleNextButtonClick);
-
-        // Display the initial image
-        updateImage();
-    </script>
-  </body>
+  </body>   
 </html>

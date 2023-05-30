@@ -30,6 +30,23 @@ def read_all_frames():
     return jpeg_files
 
 
+def delete_files_in_directory():
+    # Get the full path of the current file
+    file_path = os.path.abspath(__file__)
+
+    # Get the directory name of the current file
+    dir_name = os.path.dirname(file_path)
+    directory = f'{dir_name}/static/operator-server-frames/'
+
+    # Get the list of files in the directory
+    files = os.listdir(directory)
+    
+    # Iterate over the files and delete each one
+    for file_name in files:
+        file_path = os.path.join(directory, file_name)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
 async def send_video_from_model_to_operator():
     model_server_socket, client_addr = create_socket_and_bind_it()
     send_video_frames(model_server_socket, client_addr)
