@@ -9,6 +9,7 @@ import socket
 import datetime
 import time
 import auxiliary_functions
+import math
 
 BUFF_SIZE = 65536
 HEADERSIZE = 10
@@ -19,8 +20,9 @@ class ModelSocket:
         print("(step 1) :: ModelSocket :: __init__ ")
         self.video_name = video_name
 
-        from Rescue_Sign import RescueSignModel
-        self.model = RescueSignModel()
+        # TODO: Create Model
+        # from Rescue_Sign import RescueSignModel
+        # self.model = RescueSignModel()
 
     def get_src_vid_path(self):
         self.file_path = os.path.abspath(__file__)
@@ -37,7 +39,7 @@ class ModelSocket:
         self.path_out = self.dir_name + '\static\model-server-frames'
 
 
-        return self.path_out, self.videos_location
+        # return self.path_out, self.videos_location
 
     def open_operator_socket(self):
         print("::: open_operator_socket() ::::")
@@ -94,108 +96,94 @@ class ModelSocket:
 
     def send_frames_by_chunks(self):
         print(":: send_frames_by_chunks ::")
-        # Get the full path of the current file
-        _, static_folder_location = self.get_src_vid_path()
+        
         pendingImages_folder = 'C:\\Users\\project25\\RescueSign\\PendingImages'
-
-        video_src = static_folder_location + "\\" + self.video_name
-        print(f"video_src = {video_src}")
+        
+        # Get the full path of the current file
+        # _, static_folder_location = self.get_src_vid_path()
+        
+        self.get_src_vid_path()
+        video_full_path = self.dir_name + "/static/" + self.video_name
 
         # Open the video file or capture from a camera
-        vid = cv2.VideoCapture(video_src)
+        vid = cv2.VideoCapture(video_full_path)
 
         
         # initialize frame_counter:
         frames_counter = 0
-        total_frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
-        vid_frame_rate = vid.get(cv2.CAP_PROP_FPS)
-        current_frame = 0
+        frame_index = 0
         frame_chunk_size = 100
         frames_chunk = []
-        frame_index = 0
-
-        print(f"total frames = {total_frames}")
+        fps = 6  # Desired frame rate (6 frames per second)
+        
+        
+        vid_frame_rate = vid.get(cv2.CAP_PROP_FPS)
         time1 = time.time()
         
-        # Choose frame rate 
-        fps = 6  # Desired frame rate (4 frames per second)
+        # total_frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+        # print(f"total frames = {total_frames}")
 
         while vid.isOpened():
             return_val, frame = vid.read()
             if not return_val:
-            
-                # If there are frames that have not yet been sent:
-                if len(frames_chunk) > 0:
-                    # print("::: if len(frames_chunk) > 0::::")
-                    try:
-                        print(" :: Run the model ::")
-                        self.model.run_model()
-                        print(f":::: model.output :::")
-                        print(self.model.output)  
-
-                        # If the model found positive images
-                        if len(self.model.output) > 0:
-                            print(f"::::create socket and bind it with the operator :::")
-                            self.create_socket_and_bind_it()
-
-                            print(":: send_frames_to_operator ::")
-                            self.send_frames_to_operator(frames_chunk, self.model.output)
-                    except Exception as e:
-                        print("An exception occured: ", str(e))
-                
+                self.process_remaining_frames(frames_chunk)
                 break
 
-            # Calculate the elapsed time since the last frame
-            # elapsed_time = time.time() - start_time
 
             frame_position = vid.get(cv2.CAP_PROP_POS_FRAMES)
-            # print("--------------------------------------------")
+            frame_is_needed = self.is_frame_needed(frame_position, vid_frame_rate, fps) # True/False - Check if the frame need to be check
             
-            import math
-            if (frame_position % math.ceil(vid_frame_rate/fps) == 0):
-                # print(f":::::: frame_index = {frame_index}")
-                frame_and_id = self.save_frame_on_disk(frame, pendingImages_folder)
-                # print(f"frame_and_id[1] = {frame_and_id[1]}")
-
+            if frame_is_needed:
+                frame_and_id = self.save_frame(frame, pendingImages_folder)
                 frames_chunk.append(frame_and_id)
-                # print(f":::: frames_counter = {frames_counter}")
-                frames_counter +=1
+                frames_counter += 1
 
-            # current_frame +=1
-
-            
-            # print(f":::: frame_chunk_size = {frame_chunk_size}")
-            # print(f":::: len(frames_chunk) = {len(frames_chunk)}")
             if frames_counter >= frame_chunk_size:
-                try:
-                    self.model.run_model()
-                    print(f":::: model.output :::")
-                    print(self.model.output)  
-
-                    if len(self.model.output) > 0:
-                        self.create_socket_and_bind_it()
-                        self.send_frames_to_operator(frames_chunk, self.model.output)
-                except Exception as e:
-                    print("An exception occured: ", str(e))
-                
-
+                self.process_frames_chunk(frames_chunk)
                 frames_chunk = []
                 frames_counter = 0
-                # return
-
-
-                # wait for the operator response: ...
-
-                # delete all the chunk of frame from DoneImages folder:
-                auxiliary_functions.delete_files_in_directory(folder_name="PendingImages")
-            
-            frame_index+=1
-
-
+            frame_index += 1
+        
         # Release the video capture
         vid.release()
         time2 = time.time()
         print(f"::: Total running time: {time2 - time1}")
+
+    def save_frame(self, frame, pendingImages_folder):
+        return self.save_frame_on_disk(frame, pendingImages_folder)
+    
+    def process_frames_chunk(self, frames_chunk):
+        try:
+            # TODO: run model
+            print("Model is running...")
+            # self.model.run_model()
+            # if len(self.model.output) > 0:
+            #     self.create_socket_and_bind_it()
+            #     self.send_frames_to_operator(frames_chunk, self.model.output)
+        except Exception as e:
+            print("An exception occured: ", str(e))
+            
+        print("Delete the frames from disk")
+        # auxiliary_functions.delete_files_in_directory(folder_name="PendingImages")
+    
+    def process_remaining_frames(self, frames_chunk):
+        print("::: process_remaining_frames() :::")
+        try:
+            # self.model.run_model()
+            print("run model ")
+            print("TODO: if the model detacts frames with rescue sign, send the frames to Operator")
+            # if len(self.model.output) > 0:
+            #     self.create_socket_and_bind_it()
+            #     self.send_frames_to_operator(frames_chunk, self.model.output)
+        except Exception as e:
+            print("An exception occured: ", str(e))
+            
+        print("Delete the frames from disk...")
+        # auxiliary_functions.delete_files_in_directory(folder_name="PendingImages")
+        
+    def is_frame_needed(self, frame_position, vid_frame_rate, fps):
+        res = frame_position % math.ceil(vid_frame_rate / fps) == 0
+        return res
 
     def send_frames_to_operator(self, frames_chunk, model_output_list):
         
@@ -234,17 +222,14 @@ class ModelSocket:
         print("Close the socket connection")
         self.model_server_socket.close()
 
-
-        
     def save_frame_on_disk(self, frame, dest):
         buffer_id = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
-        full_path = os.path.join(dest, buffer_id) + ".jpg"
-        # print(f"full_path = {full_path}")
-
-        cv2.imwrite(full_path + ".jpg", frame)
+        des_path = os.path.dirname(os.path.abspath(__file__)).replace("rescueSign", "rescueSign/modelFolders/PendingImages/")
+        frame_dest = des_path + buffer_id + ".jpg"
+        
+        cv2.imwrite(frame_dest, frame)
 
         return (frame, buffer_id)
-
 
     def save_video_frames(self, video_name):
             print(":: save_video_frames :: ")
@@ -292,8 +277,6 @@ class ModelSocket:
                 current_frame +=1
             # Release the video capture
             vid.release()
-
-
 
     def send_video_frames(self):
     
