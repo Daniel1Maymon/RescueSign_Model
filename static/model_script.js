@@ -9,9 +9,11 @@ watchVideoButton.style.display = 'block';
 
 
 function watchVideo() {
+    console.log("::: JS :: watchVideo()");
+
     var select = document.getElementById('file-select');
     var selectedOption = select.options[select.selectedIndex].text;
-    console.log("::: selectedOption = ", selectedOption)
+    console.log("selectedOption = ", selectedOption)
 
     var videoUrl = '/static/' + selectedOption;
 
@@ -30,21 +32,21 @@ function watchVideo() {
 
 
 function uploadFile() {
+    console.log("::: JS :: uploadFile() :: ");
     var select = document.getElementById('file-select');
-    console.log("::: uploadFile() :: ");
     var selectedOption = select.options[select.selectedIndex].text;
-    
+    console.log("selectOption: ", selectedOption);
 
     fetch('/process_file', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ option: selectedOption})
+        body: JSON.stringify({ option: selectedOption })
     })
-    .then(response => {
-        console.log("Server response: ", response);
-    })
+        .then(response => {
+            console.log("Server response: ", response);
+        })
 }
 
 function populateFileSelect(fileNames) {
@@ -59,6 +61,7 @@ function populateFileSelect(fileNames) {
 }
 
 function fetchFileNamesFromServer() {
+    console.log("::: JS :: fetchFileNamesFromServer() :: ");
     fetch('/get_file_names')
         .then(response => response.json())
         .then(data => {
