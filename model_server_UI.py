@@ -31,20 +31,33 @@ def model_ui():
 
 @app.route('/get_file_names')
 def get_file_names():
+    print(":: ROUTE: /get_file_names ::")
     
     # Get the full path of the current file
-    file_path = os.path.abspath(__file__) # Rescue_Sign_SERVER_proj\model_server_UI.py
-    # Get the directory name of the current file
-    dir_path = os.path.dirname(file_path) + '/static'
-
-    file_names = [file for file in os.listdir(dir_path) if (file.endswith('.mp4')) or (file.endswith('.MOV'))]
+    file_path = os.path.abspath(__file__) # /.../rescueSign/model_server_UI.py
+    
+    # Get the directory name of the current file:
+    dir_path = os.path.dirname(file_path) + '/static' # /.../rescueSign/static
+    
+    # print(f"file_path = {file_path}")
+    # print(f"dir_path = {dir_path}")
+    # print(f"os.path.dirname(__file__) = {os.path.dirname(__file__)}")
+    # print(f"__file__ = {__file__}")
+    # print(f"os.listdir(dir_path) = {os.listdir(dir_path)}")
+    
+    files_list = os.listdir(dir_path)
+    file_names = [file for file in files_list if (file.endswith('.mp4')) or (file.endswith('.MOV'))]
 
     return jsonify(file_names)
 
 @app.route('/process_file', methods=['POST'])
 def process_file():
-    print(":: process_file ::")
+    print(":: ROUTE: /process_file ::")
+    
     data = request.get_json()
+    print("data = ")
+    print(data)
+    
     video_name = data['option']
 
 
@@ -58,23 +71,7 @@ def process_file():
     model_socket.send_frames_by_chunks()
 
 
-    auxiliary_functions.clean_model_folders()
-
-
-    # Call the model on the video frames:
-    # model = RescueSignModel()
-    # model.run_model()
-
-    # print(f":::: model.output :::")
-    # print(model.output)   
-
-    # model_socket.create_socket_and_bind_it()
-
-    # start_time = time.time()
-    # model_socket.send_video_frames()
-    # end_time = time.time()
-    # execution_time = end_time - start_time
-    # print(f":::: execution_time = {execution_time}")
+    # auxiliary_functions.clean_model_folders()
 
     return 'Option received'
 
