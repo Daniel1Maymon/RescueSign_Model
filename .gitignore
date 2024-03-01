@@ -2,4 +2,11 @@
 p38Env/
 myEnv/
 
-test.py
+# Ignore compiled bytecode versions:
+__pycache__/
+
+# Ignore compiled files
+*.Identifier
+
+# Ignore picture files
+*.jpg
