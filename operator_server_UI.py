@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import requests
+# import requests
 from auxiliary_functions import read_all_frames, delete_files_in_directory
 from operator_socket_class import OperatorSocket
 from flask_cors import CORS
@@ -18,7 +18,7 @@ def add_cache_control(response):
 def index():
 
     framePaths = read_all_frames() 
-    return render_template('display.html', imageUrls=framePaths)
+    return render_template('operator_ui.html', imageUrls=framePaths)
     # return render_template('display.html')
 
 def send_answer(selected_answer):
@@ -33,7 +33,6 @@ def get_images_urls():
 @app.route('/create_socket_connection')
 def create_socket_connection():
 
-
     # open socket connection
     connected = False 
     while not connected: 
@@ -43,7 +42,7 @@ def create_socket_connection():
             print(f"time = {time.time()}")
             print("/create_socket_connection :: get new request")
             # First, delete all the oldest frames
-            delete_files_in_directory(folder_name="Rescue_Sign_SERVER_proj/static/operator-server-frames")
+            # delete_files_in_directory(folder_name="Rescue_Sign_SERVER_proj/static/operator-server-frames")
 
             opertor_socket = OperatorSocket()
             opertor_socket.create_socket_and_bind_it_to_model()
