@@ -97,6 +97,14 @@ class ModelSocket:
     def send_frames_by_chunks(self):
         print(":: send_frames_by_chunks ::")
         
+        '''
+        1. Save the full video path
+        2. Open the video file with CV2
+        3. Read and save the video frames:
+            3.1. Save every sixth frame in chunk
+            3.2. When the chunk is filled with 50 frames, we will send the chunk to the operator (using socket)
+        '''
+        
         pendingImages_folder = 'C:\\Users\\project25\\RescueSign\\PendingImages'
         
         # Get the full path of the current file
@@ -112,7 +120,7 @@ class ModelSocket:
         # initialize frame_counter:
         frames_counter = 0
         frame_index = 0
-        frame_chunk_size = 100
+        chunk_size = 50
         frames_chunk = []
         fps = 6  # Desired frame rate (6 frames per second)
         
@@ -125,11 +133,17 @@ class ModelSocket:
 
         while vid.isOpened():
             return_val, frame = vid.read()
+            # After reading the last frame:
             if not return_val:
-                self.process_remaining_frames(frames_chunk)
+                # If the current chunk contains frames, send the frames
+                # self.process_remaining_frames(frames_chunk)
+                self.process_frames_chunk(frames_chunk)
                 break
 
 
+            '''
+            Save every sixth frame in the current chunk::
+            ''' 
             frame_position = vid.get(cv2.CAP_PROP_POS_FRAMES)
             frame_is_needed = self.is_frame_needed(frame_position, vid_frame_rate, fps) # True/False - Check if the frame need to be check
             
@@ -138,7 +152,8 @@ class ModelSocket:
                 frames_chunk.append(frame_and_id)
                 frames_counter += 1
 
-            if frames_counter >= frame_chunk_size:
+            # When the current chunk contains chunk_size, send the chunk
+            if frames_counter >= chunk_size:
                 self.process_frames_chunk(frames_chunk)
                 frames_chunk = []
                 frames_counter = 0
@@ -153,17 +168,29 @@ class ModelSocket:
         return self.save_frame_on_disk(frame, pendingImages_folder)
     
     def process_frames_chunk(self, frames_chunk):
-        try:
-            # TODO: run model
-            print("Model is running...")
-            # self.model.run_model()
-            # if len(self.model.output) > 0:
-            #     self.create_socket_and_bind_it()
-            #     self.send_frames_to_operator(frames_chunk, self.model.output)
-        except Exception as e:
-            print("An exception occured: ", str(e))
+        '''
+        Model version:
+        '''
+        # try:
+        #     # TODO: run model
+        #     print("Model is running...")
+        #     print("Sending chunk...")
+        #     # self.model.run_model()
+        #     # if len(self.model.output) > 0:
+        #     #     self.create_socket_and_bind_it()
+        #     #     self.send_frames_to_operator(frames_chunk, self.model.output)
+        # except Exception as e:
+        #     print("An exception occured: ", str(e))
+        
+        '''
+        No Model version:
+        '''
+        if frames_chunk:
+            self.create_socket_and_bind_it()
+            self.send_frames_to_operator(frames_chunk)
             
-        print("Delete the frames from disk")
+            
+        print("Delete the frames from disk...")
         # auxiliary_functions.delete_files_in_directory(folder_name="PendingImages")
     
     def process_remaining_frames(self, frames_chunk):
@@ -185,21 +212,11 @@ class ModelSocket:
         res = frame_position % math.ceil(vid_frame_rate / fps) == 0
         return res
 
-    def send_frames_to_operator(self, frames_chunk, model_output_list):
+
+
+    def send_frames_to_operator(self, frames_chunk):
         
-        # frames_chunk = [(frame, id), (), ()]
-        # frame_id = frame_and_id[1]
-
-        model_output_list = [x.split(".")[0] for x in model_output_list]
-        frames_chunk_to_send = [frame_and_id for frame_and_id in frames_chunk if frame_and_id[1] in model_output_list]
-
-        # for x in frames_chunk:
-        #     print(f':::frame_id = {x[1]} :::::')
-
-        print(f"len(frames_chunk_to_send) = {len(frames_chunk_to_send)}")
-
-        # for frame, frame_id in frames_chunk:
-        for frame, frame_id in frames_chunk_to_send:
+        for frame, frame_id in frames_chunk:
             # Encode the frame:
             WIDTH = 400
             frame = imutils.resize(frame, width=WIDTH)
@@ -207,13 +224,14 @@ class ModelSocket:
             encoded_succes, encoded_frame = cv2.imencode(
             '.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-            # Serialize the frame into a byte array
+            # Serialize the frame (into a byte array) with pickle 
             id_and_frame = (frame_id, encoded_frame)
-            message = pickle.dumps(id_and_frame)
+            message = pickle.dumps(id_and_frame) 
 
             message = bytes(f'{len(message): < {HEADERSIZE}}', "utf-8") + message
             self.model_server_socket.sendto(message, self.client_addr)
 
+        # When all the frames have been sent, send empty message to operator
         id_and_frame = ('FINISH', None)
         message = pickle.dumps(id_and_frame)
         message = bytes(f'{len(message): < {HEADERSIZE}}', "utf-8") + message
@@ -221,6 +239,47 @@ class ModelSocket:
 
         print("Close the socket connection")
         self.model_server_socket.close()
+        pass
+        
+    '''
+    Use only when model works
+    '''
+    # def send_frames_to_operator(self, frames_chunk, model_output_list):
+        
+    #     # frames_chunk = [(frame, id), (), ()]
+    #     # frame_id = frame_and_id[1]
+
+    #     model_output_list = [x.split(".")[0] for x in model_output_list]
+    #     frames_chunk_to_send = [frame_and_id for frame_and_id in frames_chunk if frame_and_id[1] in model_output_list]
+
+    #     # for x in frames_chunk:
+    #     #     print(f':::frame_id = {x[1]} :::::')
+
+    #     print(f"len(frames_chunk_to_send) = {len(frames_chunk_to_send)}")
+
+    #     # for frame, frame_id in frames_chunk:
+    #     for frame, frame_id in frames_chunk_to_send:
+    #         # Encode the frame:
+    #         WIDTH = 400
+    #         frame = imutils.resize(frame, width=WIDTH)
+    #         print(f"frame_id = {frame_id}")
+    #         encoded_succes, encoded_frame = cv2.imencode(
+    #         '.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+
+    #         # Serialize the frame into a byte array
+    #         id_and_frame = (frame_id, encoded_frame)
+    #         message = pickle.dumps(id_and_frame)
+
+    #         message = bytes(f'{len(message): < {HEADERSIZE}}', "utf-8") + message
+    #         self.model_server_socket.sendto(message, self.client_addr)
+
+    #     id_and_frame = ('FINISH', None)
+    #     message = pickle.dumps(id_and_frame)
+    #     message = bytes(f'{len(message): < {HEADERSIZE}}', "utf-8") + message
+    #     self.model_server_socket.sendto(message, self.client_addr)
+
+    #     print("Close the socket connection")
+    #     self.model_server_socket.close()
 
     def save_frame_on_disk(self, frame, dest):
         buffer_id = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
