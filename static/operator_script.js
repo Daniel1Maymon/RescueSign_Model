@@ -1,9 +1,6 @@
 // JavaScript code to display one image at a time and provide navigation
 
-// var imageUrls = {{ imageUrls| tojson }}
-// var imageUrls = JSON.parse(document.currentScript.dataset.imageUrls);
-// console.log(imageUrls);
-console.log(":: Rescue_Sign_SERVER_proj\\static\\operator_script.js ::")
+
 var imageUrls = null;
 // Get the chosen option element by its ID
 var chosenOption = document.getElementById('chosen-option');
@@ -29,7 +26,7 @@ var keepMovingButton = document.getElementById('keepMoving')
 var currentIndex = 1; // Index of the currently displayed image
 
 function getImagesUrls() {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         console.log('::: function getImagesUrls():::')
 
         fetch('/get_images_urls', {
@@ -38,20 +35,19 @@ function getImagesUrls() {
                 'Content-Type': 'application/json'
             },
         })
-        .then(response => response.json())
-        .then(data => {
-            imageUrls = data;
-            console.log("imageUrls = ", imageUrls)
-            currentIndex  = 0;
-            // return imageUrls;
-            resolve(imageUrls);
-        })
-        .catch(error => {
-            console.log('Error: ', error)
-        })
-    
-        if (imageUrls !== null)
-        {
+            .then(response => response.json())
+            .then(data => {
+                imageUrls = data;
+                console.log("imageUrls = ", imageUrls)
+                currentIndex = 0;
+                // return imageUrls;
+                resolve(imageUrls);
+            })
+            .catch(error => {
+                console.log('Error: ', error)
+            })
+
+        if (imageUrls !== null) {
             console.log("imageUrls = ", imageUrls)
         }
         else {
@@ -65,6 +61,7 @@ function openSocket() {
 
     imageUrls = null
     console.log("::: OpenSocket Button clicked :::")
+
     fetch(
         '/create_socket_connection', {
         method: 'GET',
@@ -79,7 +76,7 @@ function openSocket() {
             // Start displaying the images
 
             console.log(":: Before getImagesUrls() ::")
-            getImagesUrls().then(function(result) {
+            getImagesUrls().then(function (result) {
                 imageUrls = result;
                 console.log(" :: imageUrls = ", imageUrls);
                 updateImage();
@@ -93,7 +90,7 @@ function openSocket() {
             // if (imageUrls !== null) {
             //     console.log("imageUrls is not null = ", imageUrls)
             //     // updateImage();
-            
+
             // }
             // else {
             //     console.log("imageUrls is null");
@@ -143,7 +140,7 @@ function updateImage() {
     // } else {
     //     console.log(" updateImage():: imageUrls is null")
     // }
-    
+
 }
 
 // Function to handle the previous button click
@@ -169,21 +166,21 @@ function handleNextButtonClick() {
 }
 
 
-function deleteAllFiles(){
+function deleteAllFiles() {
     console.log("::::::: deleteAllFiles()")
     fetch('/delete_oldest_frames')
-    .then(response => response.json())
-    .then(data =>{
-        console.log('response from /delete_oldest_frames: ', data)
-    })
-    .catch(error => {
-        console.error('Error: ', error)
-    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('response from /delete_oldest_frames: ', data)
+        })
+        .catch(error => {
+            console.error('Error: ', error)
+        })
 }
 
 
 function operatorResponse(response) {
-    
+
     console.log("::: operatorResponse START ")
     console.log("response = ", response)
     // Handle operator responses here
@@ -196,9 +193,9 @@ function operatorResponse(response) {
 
     // Remove the class after a timeout
     setTimeout(
-        function() {
+        function () {
             selectedOption.style.color = ""; // Reset to default color (inherit or initial)
-        }, 3000) 
+        }, 3000)
 
     imageUrls = null;
     deleteAllFiles()
@@ -217,7 +214,7 @@ function operatorResponse(response) {
             // Handle the server response here if needed 
             console.log('Server response:', response);
             console.log("delete frames")
-            
+
             // Start displaying the images
             // updateImage();
         })
@@ -226,21 +223,21 @@ function operatorResponse(response) {
             console.error('Error:', error);
         });
 
-        waitingMsg.style.display = 'block'
+    waitingMsg.style.display = 'block'
 
-        
-        // waiting for new video - Trying to connect to the model socket
-        openSocket()
+
+    // waiting for new video - Trying to connect to the model socket
+    openSocket()
 }
 
 // Add event listeners to the buttons
 prevButton.addEventListener('click', handlePrevButtonClick);
 nextButton.addEventListener('click', handleNextButtonClick);
-turnSirenButton.onclick = function() {
+turnSirenButton.onclick = function () {
     operatorResponse('Turn on siren');
 }
 
-keepMovingButton.onclick = function() {
+keepMovingButton.onclick = function () {
     operatorResponse('Keep moving')
 }
 
