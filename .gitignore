@@ -10,3 +10,7 @@ __pycache__/
 
 # Ignore picture files
 *.jpg
+
+# Ignore this files
+Kitty.mp4
+*cut2.mp4
