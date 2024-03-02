@@ -6,27 +6,26 @@ import cv2
 def read_all_frames():
     frames = []
     # Get the full path of the current file
-    file_path = os.path.abspath(__file__)
+    # file_path = os.path.abspath(__file__)
     # print(f"file_path = {file_path}")
 
     # Get the directory name of the current file
-    dir_name = os.path.dirname(file_path)
-    directory = "\\static\\operator-server-frames\\"
-    directory = dir_name + directory
+    # dir_name = os.path.dirname(file_path)
+    # directory = "\\static\\operator-server-frames\\"
+    # directory = dir_name + directory
     # print(f'directory = {directory}')
     # print(f"os.getcwd()={os.getcwd()}")
-    frames_dir = os.getcwd() + "\\Rescue_Sign_SERVER_proj\\static\operator-server-frames"
-    print(f"frames_dir = {frames_dir}")
+    frames_path = os.getcwd() + "/operatorFolders/frames/"
+    
 
     # Get the list of files in the directory
-    file_list = os.listdir(frames_dir)
+    file_list = os.listdir(frames_path)
     print(f"file_list = {file_list}")
 
     # Filter out JPEG files
     jpeg_files = [file for file in file_list if file.endswith('.jpg')]
     jpeg_files.sort()
-    jpeg_files = [os.path.join(
-        'static/operator-server-frames/', file_name) for file_name in jpeg_files]
+    jpeg_files = [frames_path + file_name for file_name in jpeg_files]
 
     # Read each JPEG file
     # for file_name in jpeg_files:
