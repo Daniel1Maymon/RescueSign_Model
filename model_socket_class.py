@@ -100,9 +100,11 @@ class ModelSocket:
         '''
         1. Save the full video path
         2. Open the video file with CV2
-        3. Read and save the video frames:
+        3. Read and send the video frames:
             3.1. Save every sixth frame in chunk
             3.2. When the chunk is filled with 50 frames, we will send the chunk to the operator (using socket)
+            3.3. wait until the chunk received at the operator
+            3.4. close the connection and work on the next chunk
         '''
         
         pendingImages_folder = 'C:\\Users\\project25\\RescueSign\\PendingImages'
@@ -120,9 +122,9 @@ class ModelSocket:
         # initialize frame_counter:
         frames_counter = 0
         frame_index = 0
-        chunk_size = 50
+        chunk_size = 10
         frames_chunk = []
-        fps = 6  # Desired frame rate (6 frames per second)
+        fps = 5  # Desired frame rate (6 frames per second)
         
         
         vid_frame_rate = vid.get(cv2.CAP_PROP_FPS)
@@ -152,7 +154,7 @@ class ModelSocket:
                 frames_chunk.append(frame_and_id)
                 frames_counter += 1
 
-            # When the current chunk contains chunk_size, send the chunk
+            # When the current chunk contains chunk_size fraimes, send the chunk
             if frames_counter >= chunk_size:
                 self.process_frames_chunk(frames_chunk)
                 frames_chunk = []
