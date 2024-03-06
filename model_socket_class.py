@@ -120,11 +120,11 @@ class ModelSocket:
 
         
         # initialize frame_counter:
-        frames_counter = 0
+        frame_counter = 0
         frame_index = 0
-        chunk_size = 10
+        max_chunk_size = 10
         frames_chunk = []
-        fps = 5  # Desired frame rate (6 frames per second)
+        nth_frame = 5  # Desired frame rate (6 frames per second)
         
         
         vid_frame_rate = vid.get(cv2.CAP_PROP_FPS)
@@ -147,27 +147,29 @@ class ModelSocket:
             Save every sixth frame in the current chunk::
             ''' 
             frame_position = vid.get(cv2.CAP_PROP_POS_FRAMES)
-            frame_is_needed = self.is_frame_needed(frame_position, vid_frame_rate, fps) # True/False - Check if the frame need to be check
+            # frame_position, vid_frame_rate, fps
+            frame_is_needed = self.is_frame_needed(frame_position, vid_frame_rate, nth_frame) # True/False - Check if the frame need to be check
             
-            if frame_is_needed:
-                frame_and_id = self.save_frame(frame, pendingImages_folder)
+            # if frame_is_needed:
+            if frame_counter % nth_frame == 0:
+                frame_and_id = self.save_frame(frame, pendingImages_folder, frame_counter)
                 frames_chunk.append(frame_and_id)
-                frames_counter += 1
+                frame_counter += 1
 
             # When the current chunk contains chunk_size fraimes, send the chunk
-            if frames_counter >= chunk_size:
+            if len(frames_chunk) == max_chunk_size:
                 self.process_frames_chunk(frames_chunk)
                 frames_chunk = []
-                frames_counter = 0
-            frame_index += 1
+                # frame_counter = 0
+            frame_counter += 1
         
         # Release the video capture
         vid.release()
         time2 = time.time()
         print(f"::: Total running time: {time2 - time1}")
 
-    def save_frame(self, frame, pendingImages_folder):
-        return self.save_frame_on_disk(frame, pendingImages_folder)
+    def save_frame(self, frame, pendingImages_folder, frame_counter):
+        return self.save_frame_on_disk(frame, pendingImages_folder, frame_counter)
     
     def process_frames_chunk(self, frames_chunk):
         '''
@@ -283,8 +285,8 @@ class ModelSocket:
     #     print("Close the socket connection")
     #     self.model_server_socket.close()
 
-    def save_frame_on_disk(self, frame, dest):
-        buffer_id = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
+    def save_frame_on_disk(self, frame, dest, frame_counter):
+        buffer_id = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f") + f'-{frame_counter}'
         des_path = os.path.dirname(os.path.abspath(__file__)).replace("rescueSign", "rescueSign/modelFolders/PendingImages/")
         frame_dest = des_path + buffer_id + ".jpg"
         
