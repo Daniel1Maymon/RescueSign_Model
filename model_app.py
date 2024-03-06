@@ -24,7 +24,7 @@ def get_response():
 
     return 'POST request received'
 
-@app.route('/model_ui', methods=['GET'])
+@app.route('/', methods=['GET'])
 def model_ui():
     # open_operator_socket()
     return render_template('model_ui.html')
@@ -64,7 +64,7 @@ def process_file():
    # model_socket.send_frames_by_chunks()
     # auxiliary_functions.clean_model_folders()
 
-    # Save the frames and then sends them to the model 
+    # Create ModelSocket object
     model_socket = ModelSocket(video_name)
 
     # model_socket.save_video_frames(video_name)
